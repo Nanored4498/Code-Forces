@@ -29,7 +29,7 @@ int main() {
 	cin.tie(nullptr);
 
 	cin >> n >> k;
-	for(int i = 0; i < n; ++i) cin >> a[i];
+	for(int i = 0; i < n; ++i) cin >> a[i];	
 	ll A0 = -3*MAX_A*(3+MAX_A), A1 = MAX_A;
 	while(A0 < A1) {
 		ll m = (A0+A1) / 2;
@@ -40,7 +40,7 @@ int main() {
 	ll k2 = get_k(A0);
 	priority_queue<pair<ll, int>> last;
 	for(int i = 0; i < n; ++i) {
-		if(A0 > a[i]) { cout << 0; };
+		if(A0 > a[i]) { res[i] = 0; continue; };
 		ld delta = 9. + 12.*(ld)(a[i]-A0);
 		ll b = (ll) ((3. + sqrt(delta)) / 6.);
 		while(D(a[i], b+1) >= A0) ++b;
@@ -56,6 +56,7 @@ int main() {
 	}
 	cout << res[0];
 	for(int i = 1; i < n; ++i) cout << " " << res[i];
+	cout << "\n";
 
 	return 0;
 }
