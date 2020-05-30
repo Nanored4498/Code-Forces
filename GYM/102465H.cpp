@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 typedef pair<int, int> pii;
@@ -30,22 +31,6 @@ vi dijkstra(int i0) {
 	return ds;
 }
 
-vi mi;
-void set(int y, int z) {
-	while(y < mi.size()) {
-		mi[y] = min(mi[y], z);
-		y += (y)&(-y);
-	}
-}
-int get(int y) {
-	int ans = INT32_MAX;
-	while(y > 0) {
-		ans = min(ans, mi[y]);
-		y -= (y)&(-y);
-	}
-	return ans;
-}
-
 int main() {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
@@ -60,7 +45,6 @@ int main() {
 	}
 	vi d[3];
 	for(int i = 0; i < 3; ++i) d[i] = dijkstra(i);
-	for(int i = 0; i < N; ++i) ++ d[1][i];
 	vi order(N);
 	for(int i = 0; i < N; ++i) order[i] = i;
 	sort(order.begin(), order.end(), [&](int i, int j) {
@@ -68,20 +52,24 @@ int main() {
 		if(d[1][i] != d[1][j]) return d[1][i] < d[1][j];
 		return d[2][i] < d[2][j];
 	});
-	int ans = 0, d2m = 0;
-	for(int i = 0; i < N; ++i) d2m = max(d2m, d[1][i]);
-	mi.assign(d2m+1, INT32_MAX);
+	int ans = 0;
+	map<int, int> mi;
 	for(int i = 0; i < N; ++i) {
 		int j = order[i];
 		int y = d[1][j], z = d[2][j];
-		int mz = get(y);
-		if(z < mz) {
+		auto it = mi.upper_bound(y);
+		if(it == mi.begin()) it = mi.emplace_hint(it, y, z);
+		else if(z < (--it)->second) {
+			if(it->first == y) it->second = z;
+			else it = mi.emplace_hint(++it, y, z);
+		} else continue;
+		auto it2 = ++it;
+		while(it2 != mi.end() && z <= it2->second) ++it2;
+		mi.erase(it, it2);
+		++ ans;
+		while(i+1 < N && d[0][j] == d[0][order[i+1]] && y == d[1][order[i+1]] && z == d[2][order[i+1]]) {
 			++ ans;
-			set(y, z);
-			while(i+1 < N && d[0][j] == d[0][order[i+1]] && y == d[1][order[i+1]] && z == d[2][order[i+1]]) {
-				++ ans;
-				++ i;
-			}
+			++ i;
 		}
 	}
 	cout << ans << "\n";
