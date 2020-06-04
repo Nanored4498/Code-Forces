@@ -6,7 +6,6 @@ using namespace std;
 typedef long long ll;
 typedef pair<ll, int> pii;
 typedef vector<ll> vi;
-#define print_vec(v) for(int i = 0; i < (v).size(); ++i) cerr << (v)[i] << " \n"[i+1 == (v).size()]
 
 int main() {
 	ios::sync_with_stdio(false);
