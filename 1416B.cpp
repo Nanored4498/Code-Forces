@@ -1,11 +1,8 @@
 #include <iostream>
 #include <vector>
-#include <queue>
 
 using namespace std;
 typedef vector<int> vi;
-typedef pair<int, int> pii;
-typedef tuple<int, int, int> t3i;
 
 int main() {
 	ios::sync_with_stdio(false);
@@ -23,15 +20,15 @@ int main() {
 		}
 		if(s % n == 0) {
 			int m = s / n;
-			vector<t3i> ans;
+			cout << 3*(n-1) << "\n";
 			for(int i = 2; i <= n; ++i) {
-				int x = a[i] / i;
-				a[i] -= x*i;
-				if(x == 0) continue;
-				a[1] += x*i;
-				ans.emplace_back(i, 1, x);
+				int x = a[i] % i;
+				x = (i - x) % i;
+				cout << "1 " << i << " " << x << "\n";
+				x = (a[i] + x) / i;
+				cout << i << " 1 " << x << "\n";
 			}
-
+			for(int i = 2; i <= n; ++i) cout << "1 " << i << " " << m << "\n";
 		} else cout << "-1\n";
 	}
 
