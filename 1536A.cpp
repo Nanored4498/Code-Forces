@@ -1,9 +1,6 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
 
 using namespace std;
-typedef vector<int> vi;
 
 int main() {
 	ios::sync_with_stdio(false);
