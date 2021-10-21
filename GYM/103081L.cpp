@@ -38,11 +38,9 @@ int main() {
 			if(x == 0) continue;
 			int j = 0;
 			-- x;
-			if(i == 9907) cerr << x << ' ';
 			while(pref[x][j] != i) ++j;
 			score[x][j] = ++ sc;
 		}
-			if(i == 9907) cerr << endl;
 	}
 
 	for(int i0 = 0; i0 < N; ++i0) {
@@ -62,19 +60,6 @@ int main() {
 			}
 			++ m[i];
 		}
-	}
-
-	for(int i = 0; i < N; ++i) {
-		for(int j = 0; j < m[i]; ++j) {
-			int r = pref[i][j];
-			if(Q[r].size() < c[r] || score[i][j] < Q[r].top().first)
-				cerr << "bug " << i << ' ' << j << endl;
-		}
-	}
-	for(int i : {9906, 9907}) {
-		cerr << i << ' ' << m[i] << ' ' << pref[i].size() << ' ' << pref[i].back() << ' ' << score[i].back() << endl;
-		for(int j : pref[i]) cerr << j << ' ';
-		cerr << endl;
 	}
 
 	for(int i = 0; i < N; ++i)
