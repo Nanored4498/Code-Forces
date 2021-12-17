@@ -1,5 +1,5 @@
 #include <iostream>
-#include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -33,20 +33,20 @@ int main() {
 	cin >> N;
 	fact[0] = 1;
 	for(ll i = 1; i <= 2*N; ++i) fact[i] = (i*fact[i-1]) % MOD;
-	priority_queue<ll> Q;
+	vector<ll> Q;
 	ll res = 1, v;
 	for(int i = 0; i < N; ++i) {
 		cin >> v;
-		while(!Q.empty() && Q.top() > v) {
-			ll w = Q.top(), n = 0;
-			while(!Q.empty() && Q.top() == w) { ++n; Q.pop(); }
+		while(!Q.empty() && Q.back() > v) {
+			ll w = Q.back(), n = 0;
+			while(!Q.empty() && Q.back() == w) { ++n; Q.pop_back(); }
 			res = (res * cat(n)) % MOD;
 		}
-		Q.push(v);
+		Q.push_back(v);
 	}
 	while(!Q.empty()) {
-		ll w = Q.top(), n = 0;
-		while(!Q.empty() && Q.top() == w) { ++n; Q.pop(); }
+		ll w = Q.back(), n = 0;
+		while(!Q.empty() && Q.back() == w) { ++n; Q.pop_back(); }
 		res = (res * cat(n)) % MOD;
 	}
 	cout << res << endl;
