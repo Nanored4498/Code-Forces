@@ -2,10 +2,10 @@
 #include <iomanip>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 const int MAX_N = 1000;
-const double EPS = 5e-6;
 
 struct Point {
 	double x, y;
@@ -37,46 +37,31 @@ int main() {
 	cin >> N;
 	vector<Point> ps(N);
 	for(int i = 0; i < N; ++i) cin >> ps[i].x >> ps[i].y;
-	
-	double mi = 0., ma = sqrt(X*X + Y*Y);
-	while(ma-mi > 2*EPS && (ma-mi)/(ma+mi) > EPS) {
-		for(int i = 0; i < N+2; ++i) {
-			r[i] = i;
-			s[i] = 1;
-		}
 
-		double d = (ma+mi) / 2.;
-		for(int i = 0; i < N; ++i) {
-			if(ps[i].x <= d || ps[i].y >= Y-d) merge(i, N);
-			if(ps[i].x >= X-d || ps[i].y <= d) merge(i, N+1);
+	vector<tuple<double, int, int>> E;
+	E.reserve((N+2)*(N+1)/2);
+	for(int i = 0; i < N; ++i) {
+		E.emplace_back(pow(min(ps[i].x, Y-ps[i].y), 2), i, N);
+		E.emplace_back(pow(min(X-ps[i].x, ps[i].y), 2), i, N+1);
+		for(int j = 0; j < i; ++j) {
+			double dx = ps[j].x - ps[i].x;
+			double dy = ps[j].y - ps[i].y;
+			E.emplace_back((dx*dx + dy*dy) / 4., i, j);
 		}
+	}
+
+	sort(E.begin(), E.end());
+	for(int i = 0; i < N+2; ++i) {
+		r[i] = i;
+		s[i] = 1;
+	}
+	for(auto [d, i, j] : E) {
+		merge(i, j);
 		if(find(N) == find(N+1)) {
-			ma = d;
-			continue;
+			cout << sqrt(d) << endl;
+			return 0;
 		}
-
-		double d2 = 4*d*d;
-		for(int i = 0; i < N; ++i)
-			for(int j = i+1; j < N; ++j) {
-				if(find(i) == find(j)) continue;
-				double dx = ps[j].x - ps[i].x;
-				double dy = ps[j].y - ps[i].y;
-				if(dx*dx + dy*dy <= d2) {
-					merge(i, j);
-					if(find(N) == find(N+1)) goto diag;
-				}
-			}
-		
-		nodiag:
-		mi = d;
-		continue;
-
-		diag:
-		ma = d;
-	}	
-
-	double d = (ma+mi) / 2.;
-	cout << d << '\n';
+	}
 
 	return 0;
 }
