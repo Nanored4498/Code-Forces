@@ -43,35 +43,6 @@ struct Point {
 		T d = det(b-a, c-a);
 		return d == 0 ? 0 : (d > 0 ? 1 : -1);
 	}
-
-	friend bool intersect(const Point &a, const Point &b, const Point &c, const Point &d) {
-		const Vec u = b-a;
-		const Vec v = d-c;
-		const Vec u_orth = turn90(u);
-		const Vec v_orth = turn90(v);
-
-		const T ac_v_orth = dot(c-a, v_orth);
-		const T u_v_orth = dot(u, v_orth);
-		if(u_v_orth == 0) {
-			if(ac_v_orth != 0) return false; 
-		} else if(u_v_orth > 0) {
-			if(ac_v_orth < 0 || ac_v_orth > u_v_orth) return false;
-		} else {
-			if(ac_v_orth > 0 || ac_v_orth < u_v_orth) return false;
-		}
-
-		const T ca_u_orth = dot(a-c, u_orth);
-		const T v_u_orth = - u_v_orth;
-		if(v_u_orth == 0) {
-			if(ca_u_orth != 0) return false; 
-		} else if(v_u_orth > 0) {
-			if(ca_u_orth < 0 || ca_u_orth > v_u_orth) return false;
-		} else {
-			if(ca_u_orth > 0 || ca_u_orth < v_u_orth) return false;
-		}
-
-		return true;
-	}
 };
 
 // Return a clockwise convex hull
@@ -127,15 +98,14 @@ int main() {
 			best = d;
 		}
 	}
-	cerr << "here" << endl;
 	for(const auto &z : b) {
 		while(dot(ch[(i0+1)%C], z) >= dot(ch[i0], z)) {
-			cerr << "here2 " << dot(ch[i0], z) << endl;
-			++ i0;
+			i0 = (i0+1)%C;
 		}
 		ans[z.index] = ch[i0].index;
-		if(ch[(i0+C-1)%C].index < ch[i0].index && dot(ch[(i0+C-1)%C], z) == dot(ch[i0], z))
-			ans[z.index] = ch[(i0+C-1)%C].index;
+		const int pi = (i0+C-1) % C;
+		if(ch[pi].index < ch[i0].index && dot(ch[pi], z) == dot(ch[i0], z))
+			ans[z.index] = ch[pi].index;
 	}
 	for(int x : ans) cout << x+1 << '\n';
 
