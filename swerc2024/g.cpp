@@ -11,7 +11,7 @@ template<typename T>
 struct Point {
 	using Vec = Point;
 	T x, y;
-	int index;
+	int index, min_index;
 	Point()=default;
 	Point(T x, T y): x(x), y(y) {}
 
@@ -35,9 +35,6 @@ struct Point {
 	friend T det(const Vec &u, const Vec &v) { return u.x * v.y - u.y * v.x; }
 	friend T norm2(const Vec &u) { return dot(u, u); } 
 
-	friend bool turnLeft(const Point &a, const Point &b, const Point &c) {
-		return det(b-a, c-a) > 0;
-	}
 	// -1: turn right / 0: aligned / 1: turn left
 	friend int orientation(const Point &a, const Point &b, const Point &c) {
 		T d = det(b-a, c-a);
@@ -47,27 +44,39 @@ struct Point {
 
 // Return a clockwise convex hull
 template<typename pt>
-vector<pt> convex_hull(vector<pt>& pts, bool include_collinear=false) {
+vector<pt> convex_hull(vector<pt>& pts) {
 	if(pts.size() < 3) return pts;
 	pt p0 = *min_element(pts.begin(), pts.end(), [](const pt &a, const pt &b) {
 		return make_pair(a.y, a.x) < make_pair(b.y, b.x);
 	});
 	sort(pts.begin(), pts.end(), [&p0](const pt& a, const pt& b) {
-		int o = orientation(p0, a, b);
+		const int o = orientation(p0, a, b);
 		if(o == 0) return norm2(a-p0) < norm2(b-p0);
 		return o < 0;
 	});
-	if(include_collinear) {
-		auto it = pts.end()-1;
-		while(it >= pts.begin() && orientation(p0, *it, pts.back()) == 0) --it;
-		reverse(++it, pts.end());
-	}
+	auto it = pts.end()-1;
+	while(it >= pts.begin() && orientation(p0, *it, pts.back()) == 0) --it;
+	reverse(++it, pts.end());
 	vector<pt> st;
-	for(const pt &a : pts) {
-		while(st.size() > 1 && orientation(st[st.size()-2], st.back(), a) >= (include_collinear ? 1 : 0))
+	for(pt a : pts) {
+		while(st.size() > 1) {
+			const int o = orientation(st[st.size()-2], st.back(), a);
+			if(o == -1) break; 
+			if(o == 0) a.min_index = min(a.min_index, st.back().min_index);
 			st.pop_back();
+		}
+		if(!st.empty()) a.min_index = min(a.min_index, st.back().index);
 		st.push_back(a);
 	}
+	if(st.size() > 2) {
+		const int o = orientation(st[st.size()-2], st.back(), st[0]);
+		if(o == 0) {
+			st[0].min_index = min(st[0].min_index, st.back().min_index);
+			st.pop_back();
+		}
+	}
+	if(st.size() > 2) st[0].min_index = min(st[0].min_index, st.back().index);
+	else st[0].min_index = 0;
 	return st;
 }
 
@@ -80,10 +89,10 @@ int main() {
 	vector<Point<ll>> a(n), b(m);
 	for(auto &x : a) cin >> x;
 	for(auto &x : b) cin >> x;
-	for(int i = 0; i < n; ++i) a[i].index = i;
+	for(int i = 0; i < n; ++i) a[i].index = a[i].min_index = i;
 	for(int i = 0; i < m; ++i) b[i].index = i;
 
-	auto ch = convex_hull(a, true);
+	auto ch = convex_hull(a);
 	const int C = ch.size();
 	vi ans(m);
 	sort(b.begin(), b.end(), [&](const Point<ll> &a, const Point<ll> &b) {
@@ -98,14 +107,20 @@ int main() {
 			best = d;
 		}
 	}
-	for(const auto &z : b) {
-		while(dot(ch[(i0+1)%C], z) >= dot(ch[i0], z)) {
-			i0 = (i0+1)%C;
+	if(C > 2) {
+		for(const auto &z : b) {
+			while(dot(ch[(i0+1)%C], z) >= dot(ch[i0], z)) i0 = (i0+1)%C;
+			if(dot(ch[(i0+C-1) % C], z) == dot(ch[i0], z)) ans[z.index] = ch[i0].min_index;
+			else ans[z.index] = ch[i0].index;
 		}
-		ans[z.index] = ch[i0].index;
-		const int pi = (i0+C-1) % C;
-		if(ch[pi].index < ch[i0].index && dot(ch[pi], z) == dot(ch[i0], z))
-			ans[z.index] = ch[pi].index;
+	} else if(C == 1) {
+		ans.assign(m, 0);
+	} else {
+		for(const auto &z : b) {
+			const ll x = dot(ch[0], z);
+			const ll y = dot(ch[1], z);
+			ans[z.index] = x > y ? ch[0].index : (x == y ? 0 : ch[1].index);
+		}
 	}
 	for(int x : ans) cout << x+1 << '\n';
 
